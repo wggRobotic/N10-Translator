@@ -13,10 +13,10 @@ class translator : public rclcpp::Node
 {
 public:
   translator() : Node("n10_drive_translator_node") {
-    cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("n10/cmd_vel", 10, std::bind(&translator::cmd_vel_callback, this, std::placeholders::_1));
-    drive_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("n10/drive_enable", 10, std::bind(&translator::drive_enable_callback, this, std::placeholders::_1));
-    servo_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("n10/servo_enable", 10, std::bind(&translator::servo_enable_callback, this, std::placeholders::_1));
-    servo_cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("n10/servo_cmd_vel", 10);
+    cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/n10/cmd_vel", 10, std::bind(&translator::cmd_vel_callback, this, std::placeholders::_1));
+    drive_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/drive_enable", 10, std::bind(&translator::drive_enable_callback, this, std::placeholders::_1));
+    servo_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/servo_enable", 10, std::bind(&translator::servo_enable_callback, this, std::placeholders::_1));
+    servo_cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/n10/servo_cmd_vel", 10);
     //profmay_pub_ = this->create_publisher<??>("??", 10);
     }
 
