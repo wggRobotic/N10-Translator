@@ -8,6 +8,8 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/bool.hpp"
 
+//hallo
+
 
 class translator : public rclcpp::Node
 {
