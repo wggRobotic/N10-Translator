@@ -26,7 +26,16 @@ public:
       }
     }
     void drive_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {drive_bool = msg->data;}
-    void servo_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {servo_bool = msg->data;}
+    void servo_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+      if(msg->data == false && servo_bool == true) {
+        auto msg = std::make_shared<geometry_msgs::msg::Twist>();
+        msg->linear.x = 1;
+        msg->linear.y = 0;
+        msg->angular.z = 0;
+        servo_cmd_vel_pub_->publish(*msg);
+      }
+      servo_bool = msg->data;
+    }
     
 
 private:
