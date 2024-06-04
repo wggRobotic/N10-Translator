@@ -3,12 +3,20 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <math.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/bool.hpp"
 
 //hallo
+vec2f n10Add(vec2f a, vec2f b);
+vec2f n10Sub(vec2f a, vec2f b);
+vec2f n10Mul(vec2f a, float b);
+vec2f n10Div(vec2f a, float b);
+float n10Dot(vec2f a, vec2f b);
+float n10Len(vec2f v);
+vec2f n10Unit(vec2f v);
 
 
 class translator : public rclcpp::Node
@@ -19,15 +27,20 @@ public:
     drive_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/drive_enable", 10, std::bind(&translator::drive_enable_callback, this, std::placeholders::_1));
     servo_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/servo_enable", 10, std::bind(&translator::servo_enable_callback, this, std::placeholders::_1));
     servo_cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/n10/servo_cmd_vel", 10);
-    drive_cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/n10/drive_cmd_vel", 10);
-      
-  }
+    //profmay_pub_ = this->create_publisher<??>("??", 10);
+    }
 
     void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
       if(drive_bool) {
         if(servo_bool) servo_cmd_vel_pub_->publish(*msg);
       }
+      if(servo_bool)
+      {
+        //math methode is called here
+        MathforProfMayMessage();
+      }
     }
+    
     void drive_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {drive_bool = msg->data;}
     void servo_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {
       if(msg->data == false && servo_bool == true) {
@@ -46,10 +59,27 @@ private:
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr drive_enable_sub_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr servo_enable_sub_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr servo_cmd_vel_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr drive_cmd_vel_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr profmay_pub_;
 
   bool drive_bool = true;
   bool servo_bool = true;
+};
+
+void MathforProfMayMessage()
+{
+  //Math here
+  msg->linear.
+  publishProfMayMessage();
+}
+
+void publishProfMayMessage() {
+  auto msg = std::make_shared<geometry_msgs::msg::Twist>();
+  msg->linear.x = 1; // Beispielwert
+  msg->linear.y = 0; // Beispielwert
+  msg->angular.z = 0; // Beispielwert
+  
+  // Veröffentlichen der Nachricht
+  profmay_pub_->publish(*msg);
 };
 
 int main(int argc, char * argv[])
