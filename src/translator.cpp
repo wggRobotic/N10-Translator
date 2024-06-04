@@ -10,6 +10,13 @@
 #include "std_msgs/msg/bool.hpp"
 
 //hallo
+
+typedef struct vec2f
+{
+    float x;
+    float y;
+};
+
 vec2f n10Add(vec2f a, vec2f b);
 vec2f n10Sub(vec2f a, vec2f b);
 vec2f n10Mul(vec2f a, float b);
