@@ -41,12 +41,12 @@ class translator : public rclcpp::Node {
         float lin_y = msg->linear.y;
         vec2f wheel_vels[6];
 
-        wheel_vels[0] = { halflength * ang_vel + lin_y, halfwith * ang_vel + lin_x};
-        wheel_vels[1] = { halflength * ang_vel + lin_y, -halfwith * ang_vel + lin_x};
-        wheel_vels[2] = { lin_y, ang_vel * halfwith + lin_x};
-        wheel_vels[3] = { lin_y, -ang_vel * halfwith + lin_x};
-        wheel_vels[4] = { -halflength * ang_vel + lin_y, halfwith * ang_vel + lin_x};
-        wheel_vels[5] = { -halflength * ang_vel + lin_y, -halfwith * ang_vel + lin_x};
+        wheel_vels[0] = { -halfwith * ang_vel + lin_x, halflength * ang_vel + lin_y};
+        wheel_vels[1] = { halfwith * ang_vel + lin_x, halflength * ang_vel + lin_y};
+        wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
+        wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
+        wheel_vels[4] = { -halfwith * ang_vel + lin_x, -halflength * ang_vel + lin_y};
+        wheel_vels[5] = { halfwith * ang_vel + lin_x, -halflength * ang_vel + lin_y};
 
         //+possible fwd/bwd negations
 
