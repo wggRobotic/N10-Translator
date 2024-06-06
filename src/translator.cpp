@@ -3,27 +3,24 @@
 #include <memory>
 #include <string>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/bool.hpp"
-
-//hallo
+#include "std_msgs/msg/float32_multi_array.hpp"
+//mode 0: skid
+//mode 1: servo
 
 struct vec2f {
-    float x;
-    float y;
+  float x;
+  float y;
 };
 
+float mgt(vec2f v) {return sqrt(v.x * v.x + v.y * v.y);}
 
-//vec2f n10Add(vec2f a, vec2f b);
-//vec2f n10Sub(vec2f a, vec2f b);
-//vec2f n10Mul(vec2f a, float b);
-//vec2f n10Div(vec2f a, float b);
-//float n10Dot(vec2f a, vec2f b);
-//float n10Len(vec2f v);
-//vec2f n10Unit(vec2f v);
+float halfwith = 3;
+float halflength = 4;
 
 
 class translator : public rclcpp::Node {
@@ -33,20 +30,30 @@ class translator : public rclcpp::Node {
       drive_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/drive_enable", 10, std::bind(&translator::drive_enable_callback, this, std::placeholders::_1));
       servo_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/servo_enable", 10, std::bind(&translator::servo_enable_callback, this, std::placeholders::_1));
       servo_cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/n10/servo_cmd_vel", 10);
-      teleop_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/vel/teleop", 10);
+      motor_vel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/motor_vel", 10);
     }
 
     void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
       if(drive_bool) {
+        // 0 = left front; 1 = right front; 2 = left middle; 3 = right middle; 4 = left back; 5 = right back;
+        float ang_vel = msg->angular.z;
+        float lin_x = msg->linear.x;
+        float lin_y = msg->linear.y;
+        vec2f wheel_vels[6];
 
-        //for edudrive
-        auto ret_msg = std::make_shared<geometry_msgs::msg::Twist>();
-        ret_msg->linear.x = msg->linear.x * 200;
-        ret_msg->linear.y = msg->linear.y * 200;
-        ret_msg->angular.z = msg->angular.z;
+        wheel_vels[0] = { halflength * ang_vel + lin_y, halfwith * ang_vel + lin_x};
+        wheel_vels[1] = { halflength * ang_vel + lin_y, -halfwith * ang_vel + lin_x};
+        wheel_vels[2] = { lin_y, ang_vel * halfwith + lin_x};
+        wheel_vels[3] = { lin_y, -ang_vel * halfwith + lin_x};
+        wheel_vels[4] = { -halflength * ang_vel + lin_y, halfwith * ang_vel + lin_x};
+        wheel_vels[5] = { -halflength * ang_vel + lin_y, -halfwith * ang_vel + lin_x};
 
-        teleop_pub_->publish(*ret_msg);
-        
+        //+possible fwd/bwd negations
+
+        auto motor_msg = std_msgs::msg::Float32MultiArray();
+        motor_msg.data = {mgt(wheel_vels[0]), wheel_vels[1], wheel_vels[2], wheel_vels[3], wheel_vels[4], wheel_vels[5], };
+        motor_vel_pub_->publish(motor_msg);
+
         //for servocontrol
         if(servo_bool) servo_cmd_vel_pub_->publish(*msg);
       }
@@ -73,15 +80,15 @@ class translator : public rclcpp::Node {
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr drive_enable_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr servo_enable_sub_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr servo_cmd_vel_pub_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr teleop_pub_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr motor_vel_pub_;
 
     bool drive_bool = true;
     bool servo_bool = true;
 };
 
 
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]) {
+  
   rclcpp::init(argc, argv);
   auto node = std::make_shared<translator>();
   rclcpp::spin(node);
