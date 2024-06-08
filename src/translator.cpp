@@ -10,8 +10,6 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/float32_multi_array.hpp"
-//mode 0: skid
-//mode 1: servo
 
 struct vec2f {
   float x;
@@ -23,7 +21,6 @@ float mgt(vec2f v) {return sqrt(v.x * v.x + v.y * v.y);}
 float halfwith = 0.1;
 float wheeldistance = 0.1;
 float wheelradius = 0.06;
-
 
 class translator : public rclcpp::Node {
   public:
@@ -44,31 +41,37 @@ class translator : public rclcpp::Node {
         vec2f wheel_vels[6];
 
         //velocity vectors
+        if(servo_bool) {
+          servo_cmd_vel_pub_->publish(*msg);
 
-        wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-        wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-        wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
-        wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
-        wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
-        wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
+          wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
+          wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
+          wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
+          wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
+          wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
+          wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
+        }
+
+        else {
+          wheel_vels[0] = { -halfwith * ang_vel + lin_x, 0};
+          wheel_vels[1] = { halfwith * ang_vel + lin_x, 0};
+          wheel_vels[2] = { -ang_vel * halfwith + lin_x, 0};
+          wheel_vels[3] = { ang_vel * halfwith + lin_x, 0};
+          wheel_vels[4] = { -halfwith * ang_vel + lin_x, 0};
+          wheel_vels[5] = { halfwith * ang_vel + lin_x, 0};
+        }
 
         auto motor_msg = std_msgs::msg::Float32MultiArray();
         motor_msg.data.resize(6, 0.0);
         
-        //wheel rotations per second and negations based on pointing direction
-        
+        //wheel rotations per second and negations based on pointing direction  
         for(int i = 0; i < 6; i++) {
           motor_msg.data[i] = 60 * mgt(wheel_vels[i]) / (2 * wheelradius * M_PI);
           if(wheel_vels[i].x < 0) motor_msg.data[i] *= -1; 
-
         }
         
-        motor_vel_pub_->publish(motor_msg);
-
-        //for servocontrol
-        if(servo_bool) servo_cmd_vel_pub_->publish(*msg);
+        motor_vel_pub_->publish(motor_msg);    
       }
-
     }
 
     void drive_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {drive_bool = msg->data;}
@@ -82,9 +85,7 @@ class translator : public rclcpp::Node {
         servo_cmd_vel_pub_->publish(*msg);
       }
       servo_bool = msg->data;
-
     }
-
 
   private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
@@ -96,7 +97,6 @@ class translator : public rclcpp::Node {
     bool drive_bool = true;
     bool servo_bool = true;
 };
-
 
 int main(int argc, char * argv[]) {
   
