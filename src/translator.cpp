@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 #include <cmath>
 
 #include "rclcpp/rclcpp.hpp"
@@ -19,8 +20,9 @@ struct vec2f {
 
 float mgt(vec2f v) {return sqrt(v.x * v.x + v.y * v.y);}
 
-float halfwith = 3;
-float halflength = 4;
+float halfwith = 0.1;
+float wheeldistance = 0.1;
+float wheelradius = 0.06;
 
 
 class translator : public rclcpp::Node {
@@ -41,17 +43,26 @@ class translator : public rclcpp::Node {
         float lin_y = msg->linear.y;
         vec2f wheel_vels[6];
 
-        wheel_vels[0] = { -halfwith * ang_vel + lin_x, halflength * ang_vel + lin_y};
-        wheel_vels[1] = { halfwith * ang_vel + lin_x, halflength * ang_vel + lin_y};
+        //velocity vectors
+
+        wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
+        wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
         wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
         wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
-        wheel_vels[4] = { -halfwith * ang_vel + lin_x, -halflength * ang_vel + lin_y};
-        wheel_vels[5] = { halfwith * ang_vel + lin_x, -halflength * ang_vel + lin_y};
-
-        //+possible fwd/bwd negations
+        wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
+        wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
 
         auto motor_msg = std_msgs::msg::Float32MultiArray();
-        motor_msg.data = {mgt(wheel_vels[0]), wheel_vels[1], wheel_vels[2], wheel_vels[3], wheel_vels[4], wheel_vels[5], };
+        motor_msg.data.resize(6, 0.0);
+        
+        //wheel rotations per second and negations based on pointing direction
+        
+        for(int i = 0; i < 6; i++) {
+          motor_msg.data[i] = 60 * mgt(wheel_vels[i]) / (2 * wheelradius * M_PI);
+          if(wheel_vels[i].x < 0) motor_msg.data[i] *= -1; 
+
+        }
+        
         motor_vel_pub_->publish(motor_msg);
 
         //for servocontrol
