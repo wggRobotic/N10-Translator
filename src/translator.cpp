@@ -18,9 +18,9 @@ struct vec2f {
 
 float mgt(vec2f v) {return sqrt(v.x * v.x + v.y * v.y);}
 
-float halfwith = 0.1;
-float wheeldistance = 0.1;
-float wheelradius = 0.06;
+float halfwith = 0.11;
+float wheeldistance = 0.16;
+float wheelradius = 0.056;
 
 class translator : public rclcpp::Node {
   public:
