@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
+#include <thread>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -17,6 +18,8 @@ struct vec2f {
 };
 
 float mgt(vec2f v) {return sqrt(v.x * v.x + v.y * v.y);}
+
+using namespace std::chrono_literals;
 
 float halfwith = 0.11;
 float wheeldistance = 0.16;
@@ -37,12 +40,14 @@ class translator : public rclcpp::Node {
         // 0 = left front; 1 = right front; 2 = left middle; 3 = right middle; 4 = left back; 5 = right back;
         float ang_vel = msg->angular.z;
         float lin_x = msg->linear.x;
-        float lin_y = msg->linear.y;
+        float lin_y = msg->linear.y * M_PI/2;
         vec2f wheel_vels[6];
 
         //velocity vectors
         if(servo_bool) {
           servo_cmd_vel_pub_->publish(*msg);
+
+          std::this_thread::sleep_for(2000ms);
 
           wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
           wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
