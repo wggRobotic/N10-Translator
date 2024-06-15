@@ -114,7 +114,14 @@ class translator : public rclcpp::Node {
         motor_vel_pub_->publish(vel_msg);
 
         //publish angles
-        if ( (angles[0] != last_angles[0] || angles[1] != last_angles[1] || angles[2] != last_angles[2] || angles[3] != last_angles[3] || angles[4] != last_angles[4] || angles[5] != last_angles[5] ) && !servo_currently_moving) {
+        if (
+            ( ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
+              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
+              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
+              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
+              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
+              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) )
+            && !servo_currently_moving) {
 
           auto angle_msg = std_msgs::msg::Float32MultiArray();
           angle_msg.data.resize(6);
