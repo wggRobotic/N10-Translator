@@ -114,12 +114,12 @@ class translator : public rclcpp::Node {
 
         //publish angles
         if (
-            ( ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
-              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
-              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
-              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
-              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) ||
-              ( angles[0] - last_angles[0] < -0.1 || angles[0] - last_angles[0] > 0.1 ) )
+            ( ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
+              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
+              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
+              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
+              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
+              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) )
             && !servo_currently_moving) {
 
           auto angle_msg = std_msgs::msg::Float32MultiArray();
