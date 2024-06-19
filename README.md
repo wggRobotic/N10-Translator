@@ -31,7 +31,7 @@ subscribed:
 
 publisher:
 - /n10/motor_vel Float32MultiArray length 6: rpms of wheels for edu_drive
-- /n10/servo_cmd_angle Float32MultiArray length 6: angles for servos
+- /n10/servo_cmd_wheels Float32MultiArray length 6: angles for servos
 
 IMPORTANT
 use velocity_plot.py to visualize the velocity vectors of the wheels published to /n10/servo_cmd_angle and - /n10/motor_vel
