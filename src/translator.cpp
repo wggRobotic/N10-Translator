@@ -36,9 +36,8 @@ class translator : public rclcpp::Node {
       //subscribers and publishers + clock
       cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/n10/cmd_vel", 10, std::bind(&translator::cmd_vel_callback, this, std::placeholders::_1));
       servo_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/servo_enable", 10, std::bind(&translator::servo_enable_callback, this, std::placeholders::_1));
-      //servo_cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/n10/servo_cmd_vel", 10);
       motor_vel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/motor_vel", 10);
-      servo_cmd_angel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_angle", 10);
+      servo_cmd_angel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_wheels", 10);
       timer_ = this->create_wall_timer(10ms, std::bind(&translator::timer_callback, this));
       last_call_time_ = this->now();
     }
@@ -152,7 +151,6 @@ class translator : public rclcpp::Node {
     //globals
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr servo_enable_sub_;
-    //rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr servo_cmd_vel_pub_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr motor_vel_pub_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr servo_cmd_angel_pub_;
     rclcpp::TimerBase::SharedPtr timer_;

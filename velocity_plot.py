@@ -74,7 +74,7 @@ def ros2_node_thread():
 
     # Create subscriptions
     node.create_subscription(Float32MultiArray, '/n10/motor_vel', motor_vel_callback, 10)
-    node.create_subscription(Float32MultiArray, '/n10/servo_cmd_angle', angles_callback, 10)
+    node.create_subscription(Float32MultiArray, '/n10/servo_cmd_wheels', angles_callback, 10)
 
     rclpy.spin(node)
     rclpy.shutdown()
