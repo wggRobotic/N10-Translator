@@ -38,6 +38,8 @@ class translator : public rclcpp::Node {
       servo_cmd_angel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_wheels", 10);
       timer_ = this->create_wall_timer(10ms, std::bind(&translator::timer_callback, this));
       last_call_time_ = this->now();
+
+      RCLCPP_INFO(this->get_logger(), "Translator listening ...");
     }
 
     void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
@@ -54,7 +56,7 @@ class translator : public rclcpp::Node {
       //SPEEDS
       wheel_vels[0] = { -halfwith * ang_vel + lin_x, (wheeldistance * ang_vel + lin_y) * servo_bool};
       wheel_vels[1] = { halfwith * ang_vel + lin_x, (wheeldistance * ang_vel + lin_y) * servo_bool};
-      wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y) * servo_bool};
+      wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y * servo_bool};
       wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y * servo_bool};
       wheel_vels[4] = { -halfwith * ang_vel + lin_x, (-wheeldistance * ang_vel + lin_y) * servo_bool};
       wheel_vels[5] = { halfwith * ang_vel + lin_x, (-wheeldistance * ang_vel + lin_y) * servo_bool};
