@@ -1,8 +1,6 @@
 #include <chrono>
 #include <functional>
 #include <memory>
-#include <string>
-#include <iostream>
 #include <stdio.h>
 #include <cmath>
 #include <thread>
@@ -42,7 +40,6 @@ class translator : public rclcpp::Node {
       last_call_time_ = this->now();
     }
 
-
     void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
       last_call_time_ = this->now();
 
@@ -53,43 +50,29 @@ class translator : public rclcpp::Node {
       vec2f wheel_vels[6];
 
       // ------ CALCULATION OF SPEEDS AND ANGLES -------//
-      if (servo_bool) {
-        //SPEEDS
-        wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-        wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-        wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
-        wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
-        wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
-        wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
 
-        //ANGLES
-        for (int i = 0; i < 6; i++) {
+      //SPEEDS
+      wheel_vels[0] = { -halfwith * ang_vel + lin_x, (wheeldistance * ang_vel + lin_y) * servo_bool};
+      wheel_vels[1] = { halfwith * ang_vel + lin_x, (wheeldistance * ang_vel + lin_y) * servo_bool};
+      wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y) * servo_bool};
+      wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y * servo_bool};
+      wheel_vels[4] = { -halfwith * ang_vel + lin_x, (-wheeldistance * ang_vel + lin_y) * servo_bool};
+      wheel_vels[5] = { halfwith * ang_vel + lin_x, (-wheeldistance * ang_vel + lin_y) * servo_bool};
 
-          if (wheel_vels[i].x == 0) {
-
-            if (wheel_vels[i].y > 0) angles[i] = M_PI / 2;
-            else if (wheel_vels[i].y < 0) angles[i] = -M_PI / 2;
-            else angles[i] = 0;
-          }
-
-          else {
-            angles[i] = atan(wheel_vels[i].y / wheel_vels[i].x);
-          }
-
+      //ANGLES
+      for (int i = 0; i < 6; i++) {
+        if (wheel_vels[i].x == 0) {
+          if (wheel_vels[i].y > 0) angles[i] = M_PI / 2;
+          else if (wheel_vels[i].y < 0) angles[i] = -M_PI / 2;
+          else angles[i] = 0;
+        }
+          
+        else {
+          angles[i] = atan(wheel_vels[i].y / wheel_vels[i].x);
         }
       }
 
-      //SPEEDS
-      else {
-        wheel_vels[0] = { -halfwith * ang_vel + lin_x, 0};
-        wheel_vels[1] = { halfwith * ang_vel + lin_x, 0};
-        wheel_vels[2] = { -ang_vel * halfwith + lin_x, 0};
-        wheel_vels[3] = { ang_vel * halfwith + lin_x, 0};
-        wheel_vels[4] = { -halfwith * ang_vel + lin_x, 0};
-        wheel_vels[5] = { halfwith * ang_vel + lin_x, 0};
-      }
-
-      //speeed to wheel rotations per second and negations based on pointing direction  
+      //speed to wheel rotations per second and negations based on pointing direction  
       for (int i = 0; i < 6; i++) {
 
         motor_vels[i] = 60 * mgt(wheel_vels[i]) / (2 * wheelradius * M_PI);
@@ -124,15 +107,10 @@ class translator : public rclcpp::Node {
     }
     
     void servo_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {
-      if (msg->data == false && servo_bool == true) {
-        for (int i = 0; i < 6; i++) angles[i] = 0;
-      }
-
       servo_bool = msg->data;
     }
 
   private:
-    //globals
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr servo_enable_sub_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr motor_vel_pub_;
@@ -147,9 +125,6 @@ class translator : public rclcpp::Node {
 
     rclcpp::Time last_call_time_;
 };
-
-
-
 
 
 int main(int argc, char * argv[]) {
