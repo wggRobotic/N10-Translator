@@ -101,42 +101,26 @@ class translator : public rclcpp::Node {
     //get called every 10ms
     void timer_callback() {
         //publish speeds
-        auto vel_msg = std_msgs::msg::Float32MultiArray();
-        vel_msg.data.resize(6);
+      auto vel_msg = std_msgs::msg::Float32MultiArray();
+      vel_msg.data.resize(6);
 
-        if ( (this->now().nanoseconds() - last_call_time_.nanoseconds()) / 1e6 > 100 || servo_currently_moving) {
-          for (int i = 0; i < 6; i++) vel_msg.data[i] = 0;
-        }
+      if ( (this->now().nanoseconds() - last_call_time_.nanoseconds()) / 1e6 > 100 || servo_currently_moving) {
+        for (int i = 0; i < 6; i++) vel_msg.data[i] = 0;
+      }
 
-        else { for (int i = 0; i < 6; i++) vel_msg.data[i] = motor_vels[i]; }
+      else { for (int i = 0; i < 6; i++) vel_msg.data[i] = motor_vels[i]; }
 
-        motor_vel_pub_->publish(vel_msg);
+      motor_vel_pub_->publish(vel_msg);
 
-        //publish angles
-        if (
-            ( ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
-              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
-              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
-              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
-              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) ||
-              ( angles[0] - last_angles[0] < -0.0001 || angles[0] - last_angles[0] > 0.0001 ) )
-            && !servo_currently_moving) {
+      //publish angle
+      auto angle_msg = std_msgs::msg::Float32MultiArray();
+      angle_msg.data.resize(6);
 
-          auto angle_msg = std_msgs::msg::Float32MultiArray();
-          angle_msg.data.resize(6);
+      for (int i = 0; i < 6; i++) {
+        angle_msg.data[i] = angles[i];
+      }
 
-          for (int i = 0; i < 6; i++) {
-            last_angles[i] = angles[i];
-            angle_msg.data[i] = angles[i];
-          }
-
-          servo_cmd_angel_pub_->publish(angle_msg);
-
-          servo_currently_moving = true;
-          servo_started_moving_ = this->now();
-        }
-
-        if ((this->now().nanoseconds() - servo_started_moving_.nanoseconds()) / 1e6 > 2000) { servo_currently_moving = false;}
+      servo_cmd_angel_pub_->publish(angle_msg);
     }
     
     void servo_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {
@@ -157,14 +141,11 @@ class translator : public rclcpp::Node {
 
     float motor_vels[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
-    float last_angles[6] = {0, 0, 0, 0, 0, 0};
     
     bool servo_bool = true;
     bool servo_currently_moving = false; 
 
     rclcpp::Time last_call_time_;
-    rclcpp::Time servo_started_moving_;
-
 };
 
 
