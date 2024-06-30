@@ -1,37 +1,27 @@
-internal variables
-  float motor_vels[6];
-  
-  float angles[6];
-  
-  float last_angles[6];
-  
-  bool servo_bool = true;
-  
-  bool servo_currently_moving = false; 
+# Description
+The translator node for calculating the speeds and angles of the 6 wheels
+
+ros2 name: `n10_drive_translator_node`
+
+# Interface
+
+## subscribed
+- `/n10/cmd_vel` `geometry_msgs::msg::Twist` `100 Hz expected` : linear and angular velocity of the robot
+  - `inear.x` : from `-1 ≐ -1 m/s` to `1 ≐ 1 m/s`
+  - `linear.y` : from `-1 ≐ -1 m/s` to `1 ≐ 1 m/s`
+  - `angular.z` : from `-1 ≐ -π/2 m/s` to `1 ≐ π/2 m/s` counterclockwise 
+
+- `/n10/servo_enable` `std_msgs::msg::Bool`  : servomode on and off
+
+## publishing
+- `/n10/motor_vel` `std_msgs::msg::Float32MultiArray (6)` `100 Hz` : wheel RPMs
+
+  - publishes 0 after `100ms` not `/n10/cmd_vel` recieved
+
+- `/n10/servo_cmd_wheels` `std_msgs::msg::Float32MultiArray (6)` `100 Hz` : wheel angles
+
+  - from `-π/2 ≐ pointing right` to `π/2 ≐ pointing left`
 
 
-subscribed:
-- /n10/cmd_vel Twist: get driving data
 
-  callback: calculate speeds and angles based on servo_bool, write in motor_vels and angles
-
-  x = 1 => 1m/s;
-
-  y = 1 => 1m/s;
-
-  ang = 1 => pi rad/s counterclockwise
-  
-- /n10/servo_enable Bool: servomode on and off
-
-  callback: set servo_bool, set angles to 0
-  
-- timer
-
-  callback: (every 10ms) if no new data or servo turning, publish 0 speed; publish speeds; if angles changed, publish angles and set servo_currently_moving true; if 2 seconds have passed, set it to false
-
-publisher:
-- /n10/motor_vel Float32MultiArray length 6: rpms of wheels for edu_drive
-- /n10/servo_cmd_wheels Float32MultiArray length 6: angles for servos
-
-IMPORTANT
-use velocity_plot.py to visualize the velocity vectors of the wheels published to /n10/servo_cmd_angle and - /n10/motor_vel
+#### use `velocity_plot.py` to visualize the velocity vectors for the wheels published to `/n10/servo_cmd_wheels` and `/n10/motor_vel`
