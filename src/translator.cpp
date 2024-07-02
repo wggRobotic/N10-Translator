@@ -7,7 +7,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
-#include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/float32_multi_array.hpp"
 #include "rclcpp/clock.hpp"
 #include "builtin_interfaces/msg/time.hpp"
@@ -33,7 +32,6 @@ class translator : public rclcpp::Node {
     translator() : Node("n10_drive_translator_node") {
       //subscribers and publishers + clock
       cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/n10/cmd_vel", 10, std::bind(&translator::cmd_vel_callback, this, std::placeholders::_1));
-      servo_enable_sub_ = this->create_subscription<std_msgs::msg::Bool>("/n10/servo_enable", 10, std::bind(&translator::servo_enable_callback, this, std::placeholders::_1));
       motor_vel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/motor_vel", 10);
       servo_cmd_angel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_wheels", 10);
       timer_ = this->create_wall_timer(10ms, std::bind(&translator::timer_callback, this));
@@ -54,12 +52,12 @@ class translator : public rclcpp::Node {
       // ------ CALCULATION OF SPEEDS AND ANGLES -------//
 
       //SPEEDS
-      wheel_vels[0] = { -halfwith * ang_vel + lin_x, (wheeldistance * ang_vel + lin_y) * servo_bool};
-      wheel_vels[1] = { halfwith * ang_vel + lin_x, (wheeldistance * ang_vel + lin_y) * servo_bool};
+      wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
+      wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
       wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y * servo_bool};
       wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y * servo_bool};
-      wheel_vels[4] = { -halfwith * ang_vel + lin_x, (-wheeldistance * ang_vel + lin_y) * servo_bool};
-      wheel_vels[5] = { halfwith * ang_vel + lin_x, (-wheeldistance * ang_vel + lin_y) * servo_bool};
+      wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
+      wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
 
       //ANGLES
       for (int i = 0; i < 6; i++) {
@@ -89,7 +87,7 @@ class translator : public rclcpp::Node {
       auto vel_msg = std_msgs::msg::Float32MultiArray();
       vel_msg.data.resize(6);
 
-      if ( (this->now().nanoseconds() - last_call_time_.nanoseconds()) / 1e6 > 100 || servo_currently_moving) {
+      if ( (this->now().nanoseconds() - last_call_time_.nanoseconds()) / 1e6 > 100) {
         for (int i = 0; i < 6; i++) vel_msg.data[i] = 0;
       }
 
@@ -107,10 +105,6 @@ class translator : public rclcpp::Node {
 
       servo_cmd_angel_pub_->publish(angle_msg);
     }
-    
-    void servo_enable_callback(const std_msgs::msg::Bool::SharedPtr msg) {
-      servo_bool = msg->data;
-    }
 
   private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
@@ -121,9 +115,6 @@ class translator : public rclcpp::Node {
 
     float motor_vels[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
-    
-    bool servo_bool = true;
-    bool servo_currently_moving = false; 
 
     rclcpp::Time last_call_time_;
 };
