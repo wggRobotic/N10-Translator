@@ -54,8 +54,8 @@ class translator : public rclcpp::Node {
       //SPEEDS
       wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
       wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-      wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y * servo_bool};
-      wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y * servo_bool};
+      wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
+      wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
       wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
       wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
 
@@ -108,7 +108,6 @@ class translator : public rclcpp::Node {
 
   private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr servo_enable_sub_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr motor_vel_pub_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr servo_cmd_angel_pub_;
     rclcpp::TimerBase::SharedPtr timer_;
