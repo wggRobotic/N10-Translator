@@ -11,9 +11,12 @@
 #include "rclcpp/clock.hpp"
 #include "builtin_interfaces/msg/time.hpp"
 
-#define halfwith 0.11f
-#define wheeldistance 0.16f
-#define wheelradius 0.056f
+#define halfwith 0.105f
+#define wheeldistance 0.155f
+#define wheelradius 0.05f
+
+#define seglength1 0.01f
+#define seglength2 0.01f
 
 struct vec2f {
   float x;
@@ -32,8 +35,11 @@ class translator : public rclcpp::Node {
     translator() : Node("n10_drive_translator_node") {
       //subscribers and publishers + clock
       cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/n10/cmd_vel", 10, std::bind(&translator::cmd_vel_callback, this, std::placeholders::_1));
+      arm_state_sub_ = this->create_subscription<std_msgs::msg::Float32MultiArray>("/n10/arm_state", 10, std::bind(&translator::arm_state_callback, this, std::placeholders::_1)); 
+
       motor_vel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/motor_vel", 10);
-      servo_cmd_angel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_wheels", 10);
+      servo_cmd_wheel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_wheels", 10);
+      servo_cmd_arm_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_arm", 10);
       timer_ = this->create_wall_timer(10ms, std::bind(&translator::timer_callback, this));
       last_call_time_ = this->now();
 
@@ -74,11 +80,17 @@ class translator : public rclcpp::Node {
 
       //speed to wheel rotations per second and negations based on pointing direction  
       for (int i = 0; i < 6; i++) {
-
         motor_vels[i] = 60 * mgt(wheel_vels[i]) / (2 * wheelradius * M_PI);
         if (wheel_vels[i].x < 0) motor_vels[i] *= -1; 
       }
 
+    }
+
+    void arm_state_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg) {
+      target_arm_pos.x = msg->data[0];
+      target_arm_pos.y = msg->data[1];
+      gripper_state = msg->data[2];
+      RCLCPP_INFO(this->get_logger(), "recieved..."); 
     }
 
     //get called every 10ms
@@ -103,17 +115,50 @@ class translator : public rclcpp::Node {
         angle_msg.data[i] = angles[i];
       }
 
-      servo_cmd_angel_pub_->publish(angle_msg);
+      servo_cmd_wheel_pub_->publish(angle_msg);
+
+
+      auto arm_angle_msg = std_msgs::msg::Float32MultiArray();
+      arm_angle_msg.data.resize(3); 
+
+      vec2f diff = {target_arm_pos.x - current_arm_pos.x, target_arm_pos.y - current_arm_pos.y};
+      float diffmgt = mgt(diff);
+      
+      vec2f next_state;
+
+      if(diffmgt < 100) next_state = target_arm_pos;
+      else next_state = {current_arm_pos.x + (0.0002f / diffmgt) * diff.x, current_arm_pos.y + (0.0002f / diffmgt) * diff.y};
+
+      float costheta = (next_state.x * next_state.x + next_state.y * next_state.y + seglength1 * seglength1 - seglength2 * seglength2)/(2 * seglength1 * sqrt(next_state.x * next_state.x + next_state.y * next_state.y ));
+      float coseta = (seglength1 * seglength1 + seglength2 * seglength2 - next_state.x * next_state.x - next_state.y * next_state.y)/(2 * seglength2 * seglength1);
+      
+      if(-1 <= costheta && -1 <= coseta && 1 >= costheta && 1 >= coseta) {
+        current_arm_pos = next_state;
+        arm_angle_msg.data[0] = atan(next_state.y / next_state.x) + acos(costheta);
+        arm_angle_msg.data[1] = acos(coseta) - M_PI;
+        arm_angle_msg.data[2] = gripper_state;
+        servo_cmd_arm_pub_->publish(arm_angle_msg); 
+      }
+      else  printf("costheta: %f   coseta: %f", costheta, coseta);
+
+
     }
 
   private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
-    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr motor_vel_pub_;
-    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr servo_cmd_angel_pub_;
-    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr arm_state_sub_;
 
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr motor_vel_pub_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr servo_cmd_wheel_pub_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr servo_cmd_arm_pub_;
+    rclcpp::TimerBase::SharedPtr timer_;
+    
     float motor_vels[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
+
+    vec2f current_arm_pos = {seglength2 + seglength1, 0};
+    vec2f target_arm_pos = {seglength2 + seglength1, 0};
+    float gripper_state;
 
     rclcpp::Time last_call_time_;
 };

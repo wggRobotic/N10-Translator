@@ -1,0 +1,4 @@
+source;share/translator/local_setup.bash
+source;share/translator/local_setup.dsv
+source;share/translator/local_setup.sh
+source;share/translator/local_setup.zsh
