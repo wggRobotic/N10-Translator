@@ -160,8 +160,8 @@ class translator : public rclcpp::Node {
     float motor_vels[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
 
-    vec2f current_arm_pos = {seglength2 + seglength1, 0};
-    vec2f target_arm_pos = {seglength2 + seglength1, 0};
+    vec2f current_arm_pos = {0, seglength2 + seglength1};
+    vec2f target_arm_pos = {0, seglength2 + seglength1};
     float gripper_state;
 
     rclcpp::Time last_call_time_;
