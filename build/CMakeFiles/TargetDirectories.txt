@@ -1,0 +1,10 @@
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/uninstall.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/translator_uninstall.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/translator.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/test.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/edit_cache.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/rebuild_cache.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/list_install_components.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/install.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/install/local.dir
+/home/christopher/ros2_ws/src/translator/build/CMakeFiles/install/strip.dir

@@ -25,7 +25,7 @@ def update_arm_plot(frame, ax):
     arm_angles = arm_angles_msg.data
     
     # Arm segment lengths and start points
-    segment_lengths = [0.01, 0.01]  # Example lengths for the two segments
+    segment_lengths = [0.105, 0.13]  # Example lengths for the two segments
     start_point = (0.0, 0.0)
 
     # Calculate end points of each segment
@@ -42,8 +42,8 @@ def update_arm_plot(frame, ax):
 
     ax.plot(x_positions, y_positions, marker='o', markersize=8, color='green', linewidth=3)
     
-    ax.set_xlim(-0.03, 0.03)
-    ax.set_ylim(-0.03, 0.03)
+    ax.set_xlim(-0.03, 0.3)
+    ax.set_ylim(-0.03, 0.3)
     ax.set_aspect('equal')
     ax.grid(True)
     ax.set_xlabel('X Position')

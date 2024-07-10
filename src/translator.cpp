@@ -15,8 +15,8 @@
 #define wheeldistance 0.155f
 #define wheelradius 0.05f
 
-#define seglength1 0.01f
-#define seglength2 0.01f
+#define seglength1 0.105f
+#define seglength2 0.13f
 
 struct vec2f {
   float x;
