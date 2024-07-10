@@ -1,5 +1,5 @@
 # Description
-The translator node for calculating the speeds and angles of the 6 wheels
+The translator node for calculating the speeds and angles of the 6 wheels and the robot arm
 
 ros2 name: `n10_drive_translator_node`
 
@@ -13,6 +13,8 @@ ros2 name: `n10_drive_translator_node`
 
 - `/n10/servo_enable` `std_msgs::msg::Bool`  : servomode on and off
 
+- `/n10/arm_state` `std_msgs::msg::Float32MultiArray (3)` : absolute arm position and grabber state 
+
 ## publishing
 - `/n10/motor_vel` `std_msgs::msg::Float32MultiArray (6)` `100 Hz` : wheel RPMs
 
@@ -22,6 +24,9 @@ ros2 name: `n10_drive_translator_node`
 
   - from `-π/2 ≐ pointing right` to `π/2 ≐ pointing left`
 
+-  `/n10/servo_cmd_arm` `std_msgs::msg::Float32MultiArray (3)` `10 Hz` : arm angles and grabber servo angle
 
 
-#### use `velocity_plot.py` to visualize the velocity vectors for the wheels published to `/n10/servo_cmd_wheels` and `/n10/motor_vel`
+#### Use `velocity_plot.py` to visualize the velocity vectors for the wheels published to `/n10/servo_cmd_wheels` and `/n10/motor_vel`
+
+#### and `arm_plot.py` to visualize the arm angles published to `/n10/servo_cmd_arm` 
