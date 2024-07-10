@@ -131,8 +131,8 @@ class translator : public rclcpp::Node {
 
       vec2f next_state;
 
-      if(diffmgt < 0.0005f) next_state = target_arm_pos;
-      else next_state = {current_arm_pos.x + (0.0005f / diffmgt) * diff.x, current_arm_pos.y + (0.0005f / diffmgt) * diff.y};
+      if(diffmgt < 0.005f) next_state = target_arm_pos;
+      else next_state = {current_arm_pos.x + (0.005f / diffmgt) * diff.x, current_arm_pos.y + (0.005f / diffmgt) * diff.y};
 
       float costheta = (next_state.x * next_state.x + next_state.y * next_state.y + seglength1 * seglength1 - seglength2 * seglength2)/(2 * seglength1 * sqrt(next_state.x * next_state.x + next_state.y * next_state.y ));
       float coseta = (seglength1 * seglength1 + seglength2 * seglength2 - next_state.x * next_state.x - next_state.y * next_state.y)/(2 * seglength2 * seglength1);
