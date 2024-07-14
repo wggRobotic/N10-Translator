@@ -42,12 +42,14 @@ class translator : public rclcpp::Node {
     rclcpp::TimerBase::SharedPtr wheel_timer_;
     rclcpp::TimerBase::SharedPtr arm_timer_;
     
-    float motor_vels[6] = {0, 0, 0, 0, 0, 0};
+    float motor_rpms[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
 
     vec2f current_arm_pos;
     vec2f target_arm_pos;
     float gripper_state;
+    float last_alpha;
+    float last_beta;
 
     rclcpp::Time last_call_time_;
 

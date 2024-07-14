@@ -18,6 +18,9 @@ translator::translator() : Node("n10_drive_translator_node") {
   this->declare_parameter<float>("arm.segment_1_length", 0.0f);
   this->declare_parameter<float>("arm.segment_2_length", 0.0f);
   this->declare_parameter<float>("arm.segment_3_length", 0.0f);
+  this->declare_parameter<float>("arm.initial_x", 0.0f);
+  this->declare_parameter<float>("arm.initial_y", 0.0f);
+
 
   // Get parameters
   verbosity = this->get_parameter("verbosity").as_bool();
@@ -32,9 +35,15 @@ translator::translator() : Node("n10_drive_translator_node") {
   arm_segment_1_length = this->get_parameter("arm.segment_1_length").as_double();
   arm_segment_2_length = this->get_parameter("arm.segment_2_length").as_double();
   arm_segment_3_length = this->get_parameter("arm.segment_3_length").as_double();
+  arm_initial_x = this->get_parameter("arm.initial_x").as_double();
+  arm_initial_y = this->get_parameter("arm.initial_y").as_double();
 
-  current_arm_pos = {arm_segment_3_length, arm_segment_2_length + arm_segment_1_length};
-  target_arm_pos = {arm_segment_3_length, arm_segment_2_length + arm_segment_1_length};
+  current_arm_pos = {arm_initial_x, arm_initial_y};
+  target_arm_pos = {arm_initial_x, arm_initial_y};
+
+  last_alpha = 0;
+  last_beta = 0;
+
 
   //subscribers and publishers + clock
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/n10/cmd_vel", 10, std::bind(&translator::cmd_vel_callback, this, std::placeholders::_1));
@@ -47,5 +56,5 @@ translator::translator() : Node("n10_drive_translator_node") {
   arm_timer_ = this->create_wall_timer(100ms, std::bind(&translator::arm_timer_callback, this));
   last_call_time_ = this->now();
 
-  RCLCPP_INFO(this->get_logger(), "Translator listening ...");
+  RCLCPP_INFO(this->get_logger(), "Translator listening ...\n");
 }

@@ -44,7 +44,7 @@ def update_plot(frame, ax, start_points):
     ]
 
     for i in range(len(motor_velocities)):
-        magnitude = motor_velocities[i] / 60 * 2 * math.pi * 0.056
+        magnitude = motor_velocities[i] / 60 * 2 * math.pi * 0.05
         angle_rad = angles[i]  # Assume angles are in radians
         x_start, y_start = wheel_positions[i]
         x_end = x_start + magnitude / 10 * np.cos(angle_rad + math.pi / 2)

@@ -16,3 +16,6 @@ translator:
       segment_1_length: 0.1
       segment_2_length: 0.054
       segment_3_length: 0.11
+
+      initial_x: 0.11
+      initial_y: 0.154
