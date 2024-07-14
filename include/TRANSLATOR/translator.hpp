@@ -13,14 +13,6 @@
 #include "rclcpp/clock.hpp"
 #include "builtin_interfaces/msg/time.hpp"
 
-#define halfwith 0.105f
-#define wheeldistance 0.152f
-#define wheelradius 0.05f
-
-#define seglength1 0.1f
-#define seglength2 0.054f
-#define seglength3 0.11f
-
 struct vec2f {
   float x;
   float y;
@@ -53,9 +45,23 @@ class translator : public rclcpp::Node {
     float motor_vels[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
 
-    vec2f current_arm_pos = {seglength3, seglength2 + seglength1};
-    vec2f target_arm_pos = {seglength3, seglength2 + seglength1};
+    vec2f current_arm_pos;
+    vec2f target_arm_pos;
     float gripper_state;
 
     rclcpp::Time last_call_time_;
+
+    //parameter
+    bool verbosity;
+
+    float robot_halfwidth;
+    float robot_wheel_distance;
+    float robot_wheel_radius;
+
+    float velocity_linear_scalar;
+    float velocity_angular_scalar;
+
+    float arm_segment_1_length;
+    float arm_segment_2_length;
+    float arm_segment_3_length;
 };

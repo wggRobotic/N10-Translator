@@ -11,9 +11,6 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
 
 file(GLOB_RECURSE src src/*.cpp include/*.hpp)
 
@@ -21,6 +18,13 @@ add_executable(translator ${src})
 ament_target_dependencies(translator rclcpp std_msgs geometry_msgs)
 
 target_include_directories(translator PUBLIC include)
+
+install(
+  DIRECTORY
+    launch
+    parameter
+  DESTINATION share/${PROJECT_NAME}
+)
 
 install(TARGETS
   translator

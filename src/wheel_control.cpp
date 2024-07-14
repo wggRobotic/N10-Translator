@@ -3,21 +3,21 @@
 void translator::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
   last_call_time_ = this->now();
 
-  float ang_vel = msg->angular.z * M_PI;
-  float lin_x = msg->linear.x;
-  float lin_y = msg->linear.y;
+  float lin_x = msg->linear.x * velocity_linear_scalar;
+  float lin_y = msg->linear.y * velocity_linear_scalar;
+  float ang_vel = msg->angular.z * velocity_angular_scalar;
 
   vec2f wheel_vels[6];
 
-  // ------ CALCULATION OF SPEEDS AND ANGLES -------//
+  // ------ CALCULATION OF SPEEDS AND ANGLES ------- //
 
   //SPEEDS
-  wheel_vels[0] = { -halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-  wheel_vels[1] = { halfwith * ang_vel + lin_x, wheeldistance * ang_vel + lin_y};
-  wheel_vels[2] = { -ang_vel * halfwith + lin_x, lin_y};
-  wheel_vels[3] = { ang_vel * halfwith + lin_x, lin_y};
-  wheel_vels[4] = { -halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
-  wheel_vels[5] = { halfwith * ang_vel + lin_x, -wheeldistance * ang_vel + lin_y};
+  wheel_vels[0] = { - robot_halfwidth * ang_vel + lin_x, robot_wheel_distance * ang_vel + lin_y};
+  wheel_vels[1] = { robot_halfwidth * ang_vel + lin_x, robot_wheel_distance * ang_vel + lin_y};
+  wheel_vels[2] = { - robot_halfwidth * ang_vel + lin_x, lin_y};
+  wheel_vels[3] = { robot_halfwidth * ang_vel + lin_x, lin_y};
+  wheel_vels[4] = { - robot_halfwidth * ang_vel + lin_x, - robot_wheel_distance * ang_vel + lin_y};
+  wheel_vels[5] = { robot_halfwidth * ang_vel + lin_x, - robot_wheel_distance * ang_vel + lin_y};
 
   //ANGLES
   for (int i = 0; i < 6; i++) {
@@ -34,7 +34,7 @@ void translator::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg
 
   //speed to wheel rotations per second and negations based on pointing direction  
   for (int i = 0; i < 6; i++) {
-    motor_vels[i] = 60 * mgt(wheel_vels[i]) / (2 * wheelradius * M_PI);
+    motor_vels[i] = 60 * mgt(wheel_vels[i]) / (2 * robot_wheel_radius * M_PI);
     if (wheel_vels[i].x < 0) motor_vels[i] *= -1; 
   }
 

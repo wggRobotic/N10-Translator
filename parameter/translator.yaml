@@ -1,0 +1,18 @@
+translator:
+  ros__parameters:
+    
+    verbosity: true
+
+    robot:
+      halfwidth: 0.105
+      wheel_distance: 0.152
+      wheel_radius: 0.05
+
+    velocity_conversion:
+      linear_scalar: 1.0
+      angular_scalar: 3.1415926536
+    
+    arm:
+      segment_1_length: 0.1
+      segment_2_length: 0.054
+      segment_3_length: 0.11
