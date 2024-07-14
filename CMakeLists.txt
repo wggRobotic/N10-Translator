@@ -15,8 +15,12 @@ find_package(builtin_interfaces REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(translator src/translator.cpp)
+file(GLOB_RECURSE src src/*.cpp include/*.hpp)
+
+add_executable(translator ${src})
 ament_target_dependencies(translator rclcpp std_msgs geometry_msgs)
+
+target_include_directories(translator PUBLIC include)
 
 install(TARGETS
   translator
