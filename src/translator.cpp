@@ -12,11 +12,13 @@
 #include "builtin_interfaces/msg/time.hpp"
 
 #define halfwith 0.105f
-#define wheeldistance 0.155f
+#define wheeldistance 0.152f
 #define wheelradius 0.05f
 
-#define seglength1 0.105f
-#define seglength2 0.13f
+#define seglength1 0.1f
+#define seglength2 0.054f
+#define seglength3 0.11f
+
 
 struct vec2f {
   float x;
@@ -121,10 +123,15 @@ class translator : public rclcpp::Node {
     }
     //every 100ms
     void arm_timer_callback() {
-      if(target_arm_pos.x < -0.001) return;
 
-      auto arm_angle_msg = std_msgs::msg::Float32MultiArray();
-      arm_angle_msg.data.resize(3); 
+      float costheta_whole = ((target_arm_pos.x - seglength3) * (target_arm_pos.x - seglength3) + target_arm_pos.y * target_arm_pos.y + seglength1 * seglength1 - seglength2 * seglength2)/(2 * seglength1 * sqrt((target_arm_pos.x - seglength3) * (target_arm_pos.x - seglength3) + target_arm_pos.y * target_arm_pos.y ));
+      float coseta_whole = (seglength1 * seglength1 + seglength2 * seglength2 - (target_arm_pos.x - seglength3) * (target_arm_pos.x - seglength3) - target_arm_pos.y * target_arm_pos.y)/(2 * seglength2 * seglength1);
+
+      if(1 < costheta_whole || 1 < coseta_whole || -1 > costheta_whole || -1 > coseta_whole) {
+        printf("targer out of bounds :costheta: %f   coseta: %f", costheta_whole, coseta_whole);
+        return;
+        }
+
 
       vec2f diff = {target_arm_pos.x - current_arm_pos.x, target_arm_pos.y - current_arm_pos.y};
       float diffmgt = mgt(diff);
@@ -134,17 +141,24 @@ class translator : public rclcpp::Node {
       if(diffmgt < 0.005f) next_state = target_arm_pos;
       else next_state = {current_arm_pos.x + (0.005f / diffmgt) * diff.x, current_arm_pos.y + (0.005f / diffmgt) * diff.y};
 
-      float costheta = (next_state.x * next_state.x + next_state.y * next_state.y + seglength1 * seglength1 - seglength2 * seglength2)/(2 * seglength1 * sqrt(next_state.x * next_state.x + next_state.y * next_state.y ));
-      float coseta = (seglength1 * seglength1 + seglength2 * seglength2 - next_state.x * next_state.x - next_state.y * next_state.y)/(2 * seglength2 * seglength1);
+      float costheta = ((next_state.x - seglength3) * (next_state.x - seglength3) + next_state.y * next_state.y + seglength1 * seglength1 - seglength2 * seglength2)/(2 * seglength1 * sqrt((next_state.x - seglength3) * (next_state.x - seglength3) + next_state.y * next_state.y ));
+      float coseta = (seglength1 * seglength1 + seglength2 * seglength2 - (next_state.x - seglength3) * (next_state.x - seglength3) - next_state.y * next_state.y)/(2 * seglength2 * seglength1);
+      
 
-      if(-1 <= costheta && -1 <= coseta && 1 >= costheta && 1 >= coseta) {
-        current_arm_pos = next_state;
-        arm_angle_msg.data[0] = atan(next_state.y / next_state.x) + acos(costheta) - M_PI / 2;
-        arm_angle_msg.data[1] = acos(coseta) - M_PI;
-        arm_angle_msg.data[2] = gripper_state;
-        servo_cmd_arm_pub_->publish(arm_angle_msg); 
+      if(1 < costheta || 1 < coseta || -1 > costheta || -1 > coseta) {
+        printf("next out of bounds: costheta: %f   coseta: %f", costheta, coseta);
+        return;
       }
-      else  printf("costheta: %f   coseta: %f", costheta, coseta);
+
+      auto arm_angle_msg = std_msgs::msg::Float32MultiArray();
+      arm_angle_msg.data.resize(4); 
+      current_arm_pos = next_state;
+      arm_angle_msg.data[0] = (next_state.x - seglength3 == 0 ? M_PI / 2 : ( next_state.x - seglength3 < 0 ? atan(next_state.y / (next_state.x - seglength3)) + M_PI : atan(next_state.y / (next_state.x - seglength3)) )) + acos(costheta) - M_PI / 2;
+      arm_angle_msg.data[1] = acos(coseta) - M_PI;
+      arm_angle_msg.data[2] = -M_PI / 2 - arm_angle_msg.data[0] - arm_angle_msg.data[1];
+      arm_angle_msg.data[3] = gripper_state;
+      servo_cmd_arm_pub_->publish(arm_angle_msg); 
+
     }
 
   private:
@@ -160,8 +174,8 @@ class translator : public rclcpp::Node {
     float motor_vels[6] = {0, 0, 0, 0, 0, 0};
     float angles[6] = {0, 0, 0, 0, 0, 0};
 
-    vec2f current_arm_pos = {0, seglength2 + seglength1};
-    vec2f target_arm_pos = {0, seglength2 + seglength1};
+    vec2f current_arm_pos = {seglength3, seglength2 + seglength1};
+    vec2f target_arm_pos = {seglength3, seglength2 + seglength1};
     float gripper_state;
 
     rclcpp::Time last_call_time_;

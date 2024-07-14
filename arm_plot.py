@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Global variables for storing last received arm angles, initialized to 0
-last_arm_angles_msg = Float32MultiArray(data=[0.0, 0.0])
+last_arm_angles_msg = Float32MultiArray(data=[0.0, 0.0, 0.0])
 arm_lock = threading.Lock()
 
 def arm_callback(msg):
@@ -16,6 +16,7 @@ def arm_callback(msg):
     with arm_lock:
         last_arm_angles_msg.data[0] = msg.data[0] + math.pi / 2
         last_arm_angles_msg.data[1] = msg.data[1]
+        last_arm_angles_msg.data[2] = msg.data[2]
 
 def update_arm_plot(frame, ax):
     ax.clear()
@@ -25,7 +26,7 @@ def update_arm_plot(frame, ax):
     arm_angles = arm_angles_msg.data
     
     # Arm segment lengths and start points
-    segment_lengths = [0.105, 0.13]  # Example lengths for the two segments
+    segment_lengths = [0.1, 0.054, 0.11]  # Example lengths for the two segments
     start_point = (0.0, 0.0)
 
     # Calculate end points of each segment
@@ -42,8 +43,8 @@ def update_arm_plot(frame, ax):
 
     ax.plot(x_positions, y_positions, marker='o', markersize=8, color='green', linewidth=3)
     
-    ax.set_xlim(-0.03, 0.3)
-    ax.set_ylim(-0.03, 0.3)
+    ax.set_xlim(-0.3, 0.3)
+    ax.set_ylim(-0.3, 0.3)
     ax.set_aspect('equal')
     ax.grid(True)
     ax.set_xlabel('X Position')
