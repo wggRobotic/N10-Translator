@@ -1,6 +1,9 @@
 #include <TRANSLATOR/translator.hpp>
 
 void translator::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
+
+  if (verbosity) RCLCPP_INFO(this->get_logger(), "Recieved on /n10/cmd_vel {%f, %f, %f}\n", msg->data[0], msg->data[1], msg->data[2], msg->data[3], msg->data[4], msg->data[5]);
+
   last_call_time_ = this->now();
 
   float lin_x = msg->linear.x * velocity_linear_scalar;

@@ -66,4 +66,6 @@ class translator : public rclcpp::Node {
     float arm_segment_1_length;
     float arm_segment_2_length;
     float arm_segment_3_length;
+    float arm_initial_x;
+    float arm_initial_y;
 };
