@@ -29,10 +29,10 @@ ros2 launch translator translator.launch.py
 
 -  `/n10/servo_cmd_arm` `std_msgs::msg::Float32MultiArray (4)` `10 Hz` : arm_joint angles and grabber servo angle
 
-#Parameters
-Can be set in parameter/translator.yaml
+# Parameters
+Can be set in `parameter/translator.yaml`
 
+# Simulation
+- `plot/velocity_plot.py` for visualization of velocity vectors for the wheels published to `/n10/servo_cmd_wheels` and `/n10/motor_vel`
 
-#### Use `velocity_plot.py` to visualize the velocity vectors for the wheels published to `/n10/servo_cmd_wheels` and `/n10/motor_vel`
-
-#### and `arm_plot.py` to visualize the arm angles published to `/n10/servo_cmd_arm` 
+- `plot/arm_plot.py` for visualization of arm angles published to `/n10/servo_cmd_arm` 
