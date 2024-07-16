@@ -16,7 +16,7 @@ ros2 launch translator translator.launch.py
   - `linear.y` : from `-1 ≐ -1 m/s` to `1 ≐ 1 m/s`
   - `angular.z` : from `-1 ≐ -π/2 m/s` to `1 ≐ π/2 m/s` counterclockwise 
 
-- `/n10/arm_state` `std_msgs::msg::Float32MultiArray (3)` : absolute arm position and grabber state 
+- `/n10/arm_state` `std_msgs::msg::Float32MultiArray (4)` : absolute arm position, ground_angle and grabber state 
 
 ## publishing
 - `/n10/motor_vel` `std_msgs::msg::Float32MultiArray (6)` `100 Hz` : wheel RPMs
@@ -27,7 +27,7 @@ ros2 launch translator translator.launch.py
 
   - from `-π/2 ≐ pointing right` to `π/2 ≐ pointing left`
 
--  `/n10/servo_cmd_arm` `std_msgs::msg::Float32MultiArray (4)` `10 Hz` : arm_joint angles and grabber servo angle
+-  `/n10/servo_cmd_arm` `std_msgs::msg::Float32MultiArray (4)` `25 Hz` : arm_joint angles and grabber servo angle
 
 # Parameters
 Can be set in `parameter/translator.yaml`

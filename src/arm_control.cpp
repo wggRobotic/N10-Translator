@@ -4,9 +4,10 @@
 void translator::arm_state_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg) {
 
   if (verbosity) RCLCPP_INFO(this->get_logger(), "Recieved on /n10/arm_state {%f, %f, %f}\n", msg->data[0], msg->data[1], msg->data[2]); 
-  gripper_state = msg->data[2];
+  
+  gripper_state = msg->data[3];
 
-  float x = msg->data[0] - arm_segment_3_length;
+  float x = msg->data[0];
   float y = msg->data[1];
 
   float costheta = (x * x + y * y + arm_segment_1_length * arm_segment_1_length - arm_segment_2_length * arm_segment_2_length) /(2 * arm_segment_1_length * sqrt(x * x + y * y ));
@@ -22,16 +23,25 @@ void translator::arm_state_callback(const std_msgs::msg::Float32MultiArray::Shar
 
   float beta = acos(coseta) - M_PI;
 
-  if (alpha > 2 * M_PI / 3 || alpha < - M_PI / 4 || beta > 3 * M_PI / 4 || beta < - 3 * M_PI / 4 ) {
+  if (alpha > 7 * M_PI / 12 || alpha < - M_PI / 4 || beta > 3 * M_PI / 4 || beta < - 3 * M_PI / 4 ) {
     if (verbosity) {
       RCLCPP_ERROR(this->get_logger(), "Out of allowed or servo bounds\n");
-      if (alpha > 2 * M_PI / 3 || alpha < - M_PI / 4) RCLCPP_INFO(this->get_logger(), "Alpha out of bounds. should be in [%f, %f] but is %f\n", - M_PI / 4, 2 * M_PI / 3, alpha);
+      if (alpha > 7 * M_PI / 12 || alpha < - M_PI / 4) RCLCPP_INFO(this->get_logger(), "Alpha out of bounds. should be in [%f, %f] but is %f\n", - M_PI / 4, 7 * M_PI / 12, alpha);
       if (beta > 3 * M_PI / 4 || beta < - 3 * M_PI / 4) RCLCPP_INFO(this->get_logger(), "Beta out of bounds. should be in [%f, %f] but is %f\n", - 3 * M_PI / 4, 3 * M_PI / 4, beta);
       }
     return;
   }
 
-  if (verbosity) RCLCPP_INFO(this->get_logger(), "Moving alpha to %f, beta to %f\n", alpha, beta);
+  float gamma = - beta - alpha + msg->data[2];
+
+  if(gamma > 1.31  || gamma < - 1.58) {
+    if (verbosity) {RCLCPP_ERROR(this->get_logger(), "Compensation joint out of bounds %f, %f, %f\n", alpha, beta, gamma);}
+    return;
+  }
+
+   if (verbosity) RCLCPP_INFO(this->get_logger(), "Moving alpha to %f, beta to %f\n", alpha, beta);
+  
+  arm_ground_angle = msg->data[2];
 
   target_arm_pos.x = msg->data[0];
   target_arm_pos.y = msg->data[1];
@@ -40,16 +50,16 @@ void translator::arm_state_callback(const std_msgs::msg::Float32MultiArray::Shar
 
 
 
-//10 Hz
+//25 Hz
 void translator::arm_timer_callback() {
 
   vec2f diff = {target_arm_pos.x - current_arm_pos.x, target_arm_pos.y - current_arm_pos.y};
   float diffmgt = mgt(diff);
 
-  vec2f next_state = {current_arm_pos.x + (0.005f / diffmgt) * diff.x, current_arm_pos.y + (0.005f / diffmgt) * diff.y};
-  if(diffmgt < 0.005f) next_state = target_arm_pos;
+  vec2f next_state = {current_arm_pos.x + (0.002f / diffmgt) * diff.x, current_arm_pos.y + (0.002f / diffmgt) * diff.y};
+  if(diffmgt < 0.002f) next_state = target_arm_pos;
 
-  float x = next_state.x - arm_segment_3_length;
+  float x = next_state.x;
   float y = next_state.y;
 
   auto arm_angle_msg = std_msgs::msg::Float32MultiArray();
@@ -63,7 +73,7 @@ void translator::arm_timer_callback() {
 
   if(costheta <= 1 && costheta >= -1) {
     float new_alpha = (x == 0 ? M_PI / 2 * (y > 0 ? 1 : -1) : atan(y / x) + M_PI * (x < 0 ? (y > 0 ? 1 : -1) : 0)) + acos(costheta);
-    if(alpha <= 2 * M_PI / 3 && alpha >= - M_PI / 4) alpha = new_alpha;
+    if(new_alpha <= 7 * M_PI / 12 && new_alpha >= - M_PI / 4) {alpha = new_alpha; last_alpha = new_alpha;}
   }
   
   //beta
@@ -74,12 +84,21 @@ void translator::arm_timer_callback() {
 
   if(coseta <= 1 && coseta >= -1) {
     float new_beta = acos(coseta) - M_PI;
-    if(beta <= 3 * M_PI / 4 && beta >= - 3 * M_PI / 4 ) beta = new_beta;
+    if(new_beta <= 3 * M_PI / 4 && new_beta >= - 3 * M_PI / 4 ) {beta = new_beta; last_beta = new_beta;}
+    
   }
+
+  //gamma
+
+  float gamma = last_gamma;
+
+  float new_gamma = - alpha - beta + arm_ground_angle;
+
+  if(new_gamma <= 1.31 && new_gamma > - 1.58) { gamma = new_gamma; last_gamma = new_gamma;}
 
   arm_angle_msg.data[0] = alpha - M_PI / 2;
   arm_angle_msg.data[1] = beta;
-  arm_angle_msg.data[2] = - beta - alpha;
+  arm_angle_msg.data[2] = gamma;
   arm_angle_msg.data[3] = gripper_state;
   
   servo_cmd_arm_pub_->publish(arm_angle_msg); 

@@ -23,7 +23,7 @@ void translator::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg
   wheel_vels[5] = { robot_halfwidth * ang_vel + lin_x, - robot_wheel_distance * ang_vel + lin_y};
   
   //speed to wheel rotations per second and negations based on pointing direction  
-  for (int i = 0; i < 6; i++) motor_rpms[i] = 60 * mgt(wheel_vels[i]) / (2 * robot_wheel_radius * M_PI) * (wheel_vels[i].x > 0 ? 1 : -1);
+  for (int i = 0; i < 6; i++) motor_rpms[i] = 60 * mgt(wheel_vels[i]) / (2 * robot_wheel_radius * M_PI) * (wheel_vels[i].x >= 0 ? 1 : -1);
 
   //ANGLES
   for (int i = 0; i < 6; i++) {
@@ -31,7 +31,7 @@ void translator::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg
     if (wheel_vels[i].y == 0) angles[i] = 0;
 
     else {
-      if (wheel_vels[i].x == 0) angles[i] = M_PI * (wheel_vels[i].y > 0 ? 1 : -1);
+      if (wheel_vels[i].x == 0) angles[i] = M_PI / 2 * (wheel_vels[i].y >= 0 ? 1 : -1);
       else angles[i] = atan(wheel_vels[i].y / wheel_vels[i].x);
     }
 
