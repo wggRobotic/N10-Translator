@@ -90,7 +90,7 @@ def main():
     # Main plot update loop
     while True:
         update_plot(None, ax, [])
-        time.sleep(0.1)  # Update plot 10 times a second
+        time.sleep(0.001)  # Update plot 10 times a second
 
 if __name__ == '__main__':
     main()
