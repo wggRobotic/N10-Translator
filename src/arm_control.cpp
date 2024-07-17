@@ -34,7 +34,7 @@ void translator::arm_state_callback(const std_msgs::msg::Float32MultiArray::Shar
 
   float gamma = - beta - alpha + msg->data[2];
 
-  if(gamma > 1.31  || gamma < - 1.58) {
+  if(gamma > 7 * M_PI / 12  || gamma < - M_PI / 2) {
     if (verbosity) {RCLCPP_ERROR(this->get_logger(), "Compensation joint out of bounds %f, %f, %f\n", alpha, beta, gamma);}
     return;
   }
@@ -94,7 +94,7 @@ void translator::arm_timer_callback() {
 
   float new_gamma = - alpha - beta + arm_ground_angle;
 
-  if(new_gamma <= 1.31 && new_gamma > - 1.58) { gamma = new_gamma; last_gamma = new_gamma;}
+  if(new_gamma <= 5 * M_PI / 12 && new_gamma > M_PI / 2) { gamma = new_gamma; last_gamma = new_gamma;}
 
   arm_angle_msg.data[0] = alpha - M_PI / 2;
   arm_angle_msg.data[1] = beta;
