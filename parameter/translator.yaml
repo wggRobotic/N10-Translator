@@ -16,6 +16,6 @@ translator:
       segment_1_length: 0.1
       segment_2_length: 0.054
       
-      initial_x: 0.0
-      initial_y: 0.154
-      initial_ground_angle: 0.0
+      initial_x: 0.04
+      initial_y: 0.09
+      initial_ground_angle: -1.5

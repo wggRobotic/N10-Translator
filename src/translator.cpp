@@ -54,7 +54,7 @@ translator::translator() : Node("n10_drive_translator_node") {
   servo_cmd_wheel_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_wheels", 10);
   servo_cmd_arm_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("/n10/servo_cmd_arm", 10);
   wheel_timer_ = this->create_wall_timer(10ms, std::bind(&translator::wheel_timer_callback, this));
-  arm_timer_ = this->create_wall_timer(40ms, std::bind(&translator::arm_timer_callback, this));
+  arm_timer_ = this->create_wall_timer(10ms, std::bind(&translator::arm_timer_callback, this));
   last_call_time_ = this->now();
 
   RCLCPP_INFO(this->get_logger(), "Translator listening ...\n");

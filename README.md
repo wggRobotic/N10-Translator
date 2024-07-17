@@ -27,7 +27,7 @@ ros2 launch translator translator.launch.py
 
   - from `-π/2 ≐ pointing right` to `π/2 ≐ pointing left`
 
--  `/n10/servo_cmd_arm` `std_msgs::msg::Float32MultiArray (4)` `25 Hz` : arm_joint angles and grabber servo angle
+-  `/n10/servo_cmd_arm` `std_msgs::msg::Float32MultiArray (4)` `100 Hz` : arm_joint angles and grabber servo angle
 
 # Parameters
 Can be set in `parameter/translator.yaml`

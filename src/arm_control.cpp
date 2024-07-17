@@ -50,14 +50,14 @@ void translator::arm_state_callback(const std_msgs::msg::Float32MultiArray::Shar
 
 
 
-//25 Hz
+//100 Hz
 void translator::arm_timer_callback() {
 
   vec2f diff = {target_arm_pos.x - current_arm_pos.x, target_arm_pos.y - current_arm_pos.y};
   float diffmgt = mgt(diff);
 
-  vec2f next_state = {current_arm_pos.x + (0.002f / diffmgt) * diff.x, current_arm_pos.y + (0.002f / diffmgt) * diff.y};
-  if(diffmgt < 0.002f) next_state = target_arm_pos;
+  vec2f next_state = {current_arm_pos.x + (0.0005f / diffmgt) * diff.x, current_arm_pos.y + (0.0005f / diffmgt) * diff.y};
+  if(diffmgt < 0.0005f) next_state = target_arm_pos;
 
   float x = next_state.x;
   float y = next_state.y;
