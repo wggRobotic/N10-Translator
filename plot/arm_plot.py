@@ -9,6 +9,7 @@ import numpy as np
 
 # Global variables for storing last received arm angles, initialized to 0
 last_arm_angles_msg = Float32MultiArray(data=[0.0, 0.0, 0.0])
+last_arm_state_msg = Float32MultiArray(data=[0.0, 0.0, 0.0])
 arm_lock = threading.Lock()
 
 def arm_callback(msg):
@@ -18,13 +19,21 @@ def arm_callback(msg):
         last_arm_angles_msg.data[1] = msg.data[1]
         last_arm_angles_msg.data[2] = msg.data[2]
 
+def arm_state_callback(msg):
+    global last_arm_state_msg
+    with arm_lock:
+        last_arm_state_msg = msg
+
 def update_arm_plot(frame, ax):
     ax.clear()
+
+    legend_handles = []
 
     with arm_lock:
         arm_angles_msg = last_arm_angles_msg
     arm_angles = arm_angles_msg.data
-    
+    arm_state = last_arm_state_msg.data
+
     # Arm segment lengths and start points
     segment_lengths = [0.1, 0.054, 0.11]  # Example lengths for the two segments
     start_point = (0.0, 0.0)
@@ -40,6 +49,8 @@ def update_arm_plot(frame, ax):
         y_end = y_positions[-1] + segment_lengths[i] * np.sin(current_angle)
         x_positions.append(x_end)
         y_positions.append(y_end)
+
+    arrow = ax.arrow(arm_state[0], arm_state[1], 0.01 * np.cos(arm_state[2]), 0.01 * np.sin(arm_state[2]), head_width = 0.01, head_length = 0.01, fc = 'red', ec = 'red', linewidth = 2 )
 
     ax.plot(x_positions, y_positions, marker='o', markersize=8, color='green', linewidth=3)
     
@@ -60,6 +71,7 @@ def ros2_arm_node_thread():
 
     # Create subscription for arm angles
     node.create_subscription(Float32MultiArray, '/n10/servo_cmd_arm', arm_callback, 10)
+    node.create_subscription(Float32MultiArray, '/n10/arm_state', arm_state_callback, 10)
 
     rclpy.spin(node)
     rclpy.shutdown()
